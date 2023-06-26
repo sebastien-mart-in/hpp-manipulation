@@ -177,6 +177,13 @@ PathPtr_t EET_PIECEWISE::projectedPath(vectorIn_t times,
   for (size_type i = 1; i < configs.cols() - 1; ++i)
     path->insert(times[i], configs.col(i));
 
+  typedef InterpolatedPath::InterpolationPoints_t IPs_t;
+  const IPs_t& ips2 = path->interpolationPoints();
+  cout <<  "ips2 length : " << ips2.size() << endl;
+  for (auto itera = ips2.begin(); itera != ips2.end(); itera++){
+    cout << "ips values : \n" << itera->second << endl;
+  }
+
   return path;
 }
 
@@ -277,28 +284,8 @@ void EET_HERMITE::trajectory(
   constraint_->rightHandSideFunction(eeTraj_);
 }
 
-PathPtr_t EET_HERMITE::impl_compute(ConfigurationIn_t q1,
-                                              ConfigurationIn_t q2) const {
-  try {
-    core::ConstraintSetPtr_t c(getUpdatedConstraints());
-    cout << "passed by impl_compute in EET_HERMITE steering\n "<< endl;
-
-    return core::StraightPath::create(problem()->robot(), q1, q2, timeRange_,
-                                      c);
-  } catch (const std::exception& e) {
-    std::cout << timeRange_.first << ", " << timeRange_.second << '\n';
-    if (eeTraj_)
-      std::cout << (*eeTraj_)(vector_t::Constant(1, timeRange_.first)) << '\n'
-                << (*eeTraj_)(vector_t::Constant(1, timeRange_.second))
-                << std::endl;
-    std::cout << *constraints() << std::endl;
-    std::cout << e.what() << std::endl;
-    throw;
-  }
-}
-
 PathPtr_t EET_HERMITE::projectedPath(vectorIn_t times,
-                                               matrixIn_t configs) const {
+                                               matrixIn_t configs, list<int> to_keep) const {
   core::ConstraintSetPtr_t c(getUpdatedConstraints());
 
   size_type N = configs.cols();
@@ -313,12 +300,33 @@ PathPtr_t EET_HERMITE::projectedPath(vectorIn_t times,
   using core::InterpolatedPath;
   using core::InterpolatedPathPtr_t;
 
+  cout << "\n\n In projected path before adding points" << endl;
+
   InterpolatedPathPtr_t path = InterpolatedPath::create(
       problem()->robot(), configs.col(0), configs.col(N - 1), timeRange_, c);
 
-  for (size_type i = 1; i < configs.cols() - 1; ++i)
-    path->insert(times[i], configs.col(i));
+  typedef InterpolatedPath::InterpolationPoints_t IPs_t;
+  const IPs_t& ips2 = path->interpolationPoints();
+  cout <<  "ips2 length : " << ips2.size() << endl;
+  for (auto itera = ips2.begin(); itera != ips2.end(); itera++){
+    cout << "ips values : \n" << itera->second << endl;
+  }
 
+  for (size_type i = 1; i < configs.cols() - 1; ++i){
+    auto it = find(to_keep.begin(),to_keep.end(),i);
+    if (*it == i){
+      path->insert(times[i], configs.col(i));
+    }
+  }
+
+  cout << "\n\n In projected path after adding "<< configs.cols()-2 <<" points" << endl;
+  
+  const IPs_t& ips = path->interpolationPoints();
+  cout <<  "ips length : " << ips.size() << endl;
+  for (auto itera = ips.begin(); itera != ips.end(); itera++){
+    cout << "ips values : \n" << itera->second << endl;
+  }
+  cout << "\n out of projected path \n" << endl;
   return path;
 }
 
@@ -362,6 +370,7 @@ core::ConstraintSetPtr_t EET_HERMITE::getUpdatedConstraints() const {
   }
   return c;
 }
+
 
 }  // namespace steeringMethod
 }  // namespace manipulation

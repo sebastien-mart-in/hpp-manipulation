@@ -208,7 +208,7 @@ class HPP_MANIPULATION_DLLAPI EET_HERMITE : public core::PathPlanner {
 
   PathVectorPtr_t final_answer;
 
-  value_type& M;
+  value_type M;
 };  // class EET_HERMITE
 }  // namespace pathPlanner
 }  // namespace manipulation

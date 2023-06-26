@@ -29,10 +29,16 @@
 #ifndef HPP_MANIPULATION_STEERING_METHOD_END_EFFECTOR_TRAJECTORY_HH
 #define HPP_MANIPULATION_STEERING_METHOD_END_EFFECTOR_TRAJECTORY_HH
 
+
+
+#include <iostream>
+#include <typeinfo>
+using namespace std;
 #include <hpp/core/steering-method.hh>
 #include <hpp/manipulation/config.hh>
 #include <hpp/manipulation/fwd.hh>
 #include <hpp/core/steering-method/hermite.hh>
+#include <hpp/core/path/hermite.hh>
 
 namespace hpp {
 namespace manipulation {
@@ -97,6 +103,7 @@ class HPP_MANIPULATION_DLLAPI EET_PIECEWISE
   /// \param times the time of each configuration
   /// \param configs each column correspond to a configuration
   PathPtr_t projectedPath(vectorIn_t times, matrixIn_t configs) const;
+  core::ConstraintSetPtr_t getUpdatedConstraints() const;
 
  protected:
   EET_PIECEWISE(const core::ProblemConstPtr_t& problem)
@@ -110,8 +117,11 @@ class HPP_MANIPULATION_DLLAPI EET_PIECEWISE
 
   PathPtr_t impl_compute(ConfigurationIn_t q1, ConfigurationIn_t q2) const;
 
+  PathPtr_t impl_compute(ConfigurationIn_t q1, ConfigurationIn_t q2, interval_t timeRange) const{
+    return impl_compute(q1,q2);
+  }
+  
  private:
-  core::ConstraintSetPtr_t getUpdatedConstraints() const;
 
   DifferentiableFunctionPtr_t eeTraj_;
   interval_t timeRange_;
@@ -165,7 +175,7 @@ class HPP_MANIPULATION_DLLAPI EET_HERMITE
 
   core::SteeringMethodPtr_t copy() const {
     EET_HERMITEPtr_t ptr(new EET_HERMITE(*this));
-    ptr->init(ptr);
+    ptr->init(ptr); 
     return ptr;
   }
 
@@ -173,7 +183,7 @@ class HPP_MANIPULATION_DLLAPI EET_HERMITE
   /// points.
   /// \param times the time of each configuration
   /// \param configs each column correspond to a configuration
-  PathPtr_t projectedPath(vectorIn_t times, matrixIn_t configs) const;
+  PathPtr_t projectedPath(vectorIn_t times, matrixIn_t configs, list<int> to_keep) const;
 
  protected:
   EET_HERMITE(const core::ProblemConstPtr_t& problem)
@@ -185,7 +195,6 @@ class HPP_MANIPULATION_DLLAPI EET_HERMITE
         timeRange_(other.timeRange_),
         constraint_(other.constraint_) {}
 
-  PathPtr_t impl_compute(ConfigurationIn_t q1, ConfigurationIn_t q2) const;
 
  private:
   core::ConstraintSetPtr_t getUpdatedConstraints() const;

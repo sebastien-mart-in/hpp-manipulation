@@ -107,8 +107,6 @@ void EET_PIECEWISE::startSolve() {
   // Tag init and goal configurations in the roadmap
   roadmap()->resetGoalNodes();
 
-  cout << typeid(problem()->steeringMethod()).name() << endl;
-
   SMPtr_t sm(HPP_DYNAMIC_PTR_CAST(SM_t, problem()->steeringMethod()));
   if (!sm)
     throw std::invalid_argument(
@@ -224,6 +222,7 @@ void EET_PIECEWISE::oneStep() {
         break;
       }
     }
+    cout << "steps : " << steps << endl;
     if (!success) continue;
     success = false;
 
@@ -240,7 +239,7 @@ void EET_PIECEWISE::oneStep() {
                         << condensed(steps.transpose()) << '\n');
       continue;
     }
-
+    
     core::PathPtr_t validPart;
     if (!pathValidation->validate(path, false, validPart, pathReport)) {
       hppDout(info, "Path is in collision.");
@@ -300,6 +299,7 @@ typedef manipulation::steeringMethod::EET_HERMITEPtr_t HSMPtr_t;
 
 EET_HERMITEPtr_t EET_HERMITE::create(
 const core::ProblemConstPtr_t& problem, const core::RoadmapPtr_t& roadmap) {
+cout << "passed where M is initiated "<< endl;
 value_type M(2);
 EET_HERMITEPtr_t ptr(new EET_HERMITE(problem, M));
 ptr->init(ptr);
@@ -307,6 +307,7 @@ return ptr;
 }
 
 PathVectorPtr_t EET_HERMITE::solve() {
+  cout << "M in solve " << M << endl;
   namespace bpt = boost::posix_time;
 
   interrupt_ = false;
@@ -352,6 +353,8 @@ PathVectorPtr_t EET_HERMITE::solve() {
     if (interrupt_) throw ("Interruption");
   }
   PathVectorPtr_t planned = final_answer;
+  cout<< "returned a final answer in solve" << endl;
+  
   return planned;
 }
 
@@ -369,8 +372,6 @@ std::string msg("No init config in problem.");
 hppDout(error, msg);
 throw std::runtime_error(msg);
 }
-
-cout << typeid(problem()->steeringMethod()).name() << endl;
 
 HSMPtr_t sm(HPP_DYNAMIC_PTR_CAST(HSM_t, problem()->steeringMethod()));
 if (!sm)
@@ -418,6 +419,7 @@ HPP_THROW(std::logic_error,
 }
 
 void EET_HERMITE::oneStep(){
+  cout << "beginning of oneStep" << endl;
   HSMPtr_t sm(HPP_DYNAMIC_PTR_CAST(HSM_t, problem()->steeringMethod()));
   if (!sm)
     throw std::invalid_argument(
@@ -447,6 +449,7 @@ void EET_HERMITE::oneStep(){
     hppDout(info, "Failed to generate initial configs.");
     return;
   }
+  
 
   // Generate a valid initial configuration.
   bool success = false;
@@ -463,12 +466,15 @@ void EET_HERMITE::oneStep(){
   times[nDiscreteSteps_] = timeRange.second;
 
   for (i = 0; i < qs.size(); ++i) {
+
+    list<int> to_keep;
     if (resetRightHandSide) {
       constraints->rightHandSideAt(times[0]);
       resetRightHandSide = false;
     }
     Configuration_t& q(qs[i]);
     if (!constraints->apply(q)) continue;
+    to_keep.push_back(0);
     if (!cfgValidation->validate(q, cfgReport)) continue;
     resetRightHandSide = true;
 
@@ -486,19 +492,25 @@ void EET_HERMITE::oneStep(){
         success = false;
         break;
       }
+      if (steps.col(j) != steps.col(j - 1)){
+        to_keep.push_back(j);
+      }
+    
+
     }
     if (!success) continue;
     success = false;
-
-    
-
-    if (!cfgValidation->validate(steps.col(nDiscreteSteps_), cfgReport)) {
-      hppDout(info, "Destination config is in collision.");
-      continue;
+    bool testtest = false;
+    for (int it = 1; it <= nDiscreteSteps_; ++it){
+      if (!cfgValidation->validate(steps.col(it), cfgReport)) {
+        hppDout(info, "Destination config is in collision.");
+        testtest = true;
+        continue;
+      }
     }
+    if (testtest) continue;
 
-
-    core::PathPtr_t path = sm->projectedPath(times, steps);
+    core::PathPtr_t path = sm->projectedPath(times, steps, to_keep);
     if (!path) {
       hppDout(info, "Steering method failed.\n"
                         << setpyformat << "times: " << one_line(times) << '\n'
@@ -506,16 +518,32 @@ void EET_HERMITE::oneStep(){
                         << condensed(steps.transpose()) << '\n');
       continue;
     }
+    
+    vector_t retained_times(to_keep.size());
+    int adder = 0;
+    for (int x : to_keep){
+      retained_times[adder]=times[x];
+      adder++;
+    }
 
+    core::PathPtr_t validPart;
+    if (!pathValidation->validate(path, false, validPart, pathReport)) {
+      hppDout(info, "Path is in collision.");
+      continue;
+    }
     success = false;
-    core::pathProjector::RecursiveHermitePtr_t recursor (core::pathProjector::RecursiveHermite::create(problem(), M));
-
+    M = 2;
+    cout << "M before creating recursor : " << M << endl;
+    core::pathProjector::RecursiveHermitePtr_t recursor (core::pathProjector::RecursiveHermite::create(problem(), M, retained_times));
+    cout << "M just after creating recursor : " << recursor->M_ << endl;
     core::PathPtr_t answer (hpp::core::PathVector::create(problem()->robot()->configSize(), path->outputDerivativeSize()));
+    
+    if (!recursor->impl_apply(path, answer)) continue;
 
-    if (!recursor->impl_apply(path, answer)) break;
-    cout << "passed 2 \n\n\n" << endl;
+    PathVectorPtr_t inter_ =HPP_DYNAMIC_PTR_CAST(core::PathVector,answer);
 
-    final_answer = HPP_DYNAMIC_PTR_CAST(core::PathVector, answer);
+    final_answer = inter_;
+
     problem_solved = true;
     success = true;
     if (feasibilityOnly_) break;
@@ -541,7 +569,9 @@ throw std::runtime_error(
 
 EET_HERMITE::EET_HERMITE(
 const core::ProblemConstPtr_t& problem, value_type& i)
-: core::PathPlanner(problem), M(i) {}
+: core::PathPlanner(problem), M(i) {
+  cout << "Initializing : M : " << M << endl;
+}
 
 void EET_HERMITE::checkFeasibilityOnly(bool enable) {
 feasibilityOnly_ = enable;
