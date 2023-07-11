@@ -299,7 +299,6 @@ typedef manipulation::steeringMethod::EET_HERMITEPtr_t HSMPtr_t;
 
 EET_HERMITEPtr_t EET_HERMITE::create(
 const core::ProblemConstPtr_t& problem, const core::RoadmapPtr_t& roadmap) {
-cout << "passed where M is initiated "<< endl;
 value_type M(2);
 EET_HERMITEPtr_t ptr(new EET_HERMITE(problem, M));
 ptr->init(ptr);
@@ -307,7 +306,6 @@ return ptr;
 }
 
 PathVectorPtr_t EET_HERMITE::solve() {
-  cout << "M in solve " << M << endl;
   namespace bpt = boost::posix_time;
 
   interrupt_ = false;
@@ -357,6 +355,8 @@ PathVectorPtr_t EET_HERMITE::solve() {
   
   return planned;
 }
+
+
 
 void EET_HERMITE::tryConnectInitAndGoals() {}
 
@@ -532,10 +532,7 @@ void EET_HERMITE::oneStep(){
       continue;
     }
     success = false;
-    M = 2;
-    cout << "M before creating recursor : " << M << endl;
     core::pathProjector::RecursiveHermitePtr_t recursor (core::pathProjector::RecursiveHermite::create(problem(), M, retained_times));
-    cout << "M just after creating recursor : " << recursor->M_ << endl;
     core::PathPtr_t answer (hpp::core::PathVector::create(problem()->robot()->configSize(), path->outputDerivativeSize()));
     
     if (!recursor->impl_apply(path, answer)) continue;
@@ -569,9 +566,7 @@ throw std::runtime_error(
 
 EET_HERMITE::EET_HERMITE(
 const core::ProblemConstPtr_t& problem, value_type& i)
-: core::PathPlanner(problem), M(i) {
-  cout << "Initializing : M : " << M << endl;
-}
+: core::PathPlanner(problem), M(i) {}
 
 void EET_HERMITE::checkFeasibilityOnly(bool enable) {
 feasibilityOnly_ = enable;

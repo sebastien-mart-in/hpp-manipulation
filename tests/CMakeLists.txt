@@ -28,5 +28,9 @@
 add_definitions(-DBOOST_TEST_DYN_LINK -DBOOST_TEST_MAIN)
 
 add_unit_test(test-constraintgraph test-constraintgraph.cc)
+add_unit_test(test-hermite test-hermite.cc)
 target_link_libraries(test-constraintgraph ${PROJECT_NAME}
+                      Boost::unit_test_framework)
+
+target_link_libraries(test-hermite ${PROJECT_NAME}
                       Boost::unit_test_framework)
