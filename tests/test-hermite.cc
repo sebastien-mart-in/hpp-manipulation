@@ -84,28 +84,41 @@ BOOST_AUTO_TEST_CASE(Initialization) {
 
   hpp::core::Configuration_t q_NO_TR (path_no_TR->outputSize());
   bool suc_NO_TR = path_no_TR->impl_compute(q_NO_TR, 1);
-  cout << q_NO_TR <<endl <<  path_no_TR->end() << endl;
+  std::cout << "Without using timeRange :" << std::endl; 
+  std::cout << "Expected configuration (using end() method): " << std::endl;
+  std::cout << path_no_TR->end() << std::endl;
+  std::cout << std::endl << "Calculated configuration (using impl_compute at timeRange.second): " << std::endl;
+  std::cout << q_NO_TR <<std::endl << std::endl;
   BOOST_CHECK(suc_NO_TR);
   BOOST_CHECK(q_NO_TR == path_no_TR->end());
 
   hpp::core::Configuration_t q_1_ (path1->outputSize());
   bool suc1_ = path1->impl_compute(q_1_, timeRange1.second);
-  cout << q_1_ << endl << path1 ->end() << endl;
+  std::cout << "Using timeRange method (timeRange = (0,1)): " << std::endl;
+  std::cout << "Expected configuration (using end() method): " << std::endl;
+  std::cout << path1->end() << std::endl;
+  std::cout << std::endl << "Calculated configuration (using impl_compute at timeRange.second): " << std::endl;
+  std::cout << q_1_ <<std::endl << std::endl;
   BOOST_CHECK(suc1_);
   BOOST_CHECK(q_1_ == path1->end());
-
-  hpp::core::Configuration_t q_1 (path1->outputSize());
-  bool suc1 = path1->impl_compute(q_1, timeRange1.second);
-  BOOST_CHECK(suc1);
-  BOOST_CHECK(q_1 == path1->end());
   
   hpp::core::Configuration_t q_2(path2->outputSize());
   bool suc2 = path2->impl_compute(q_2, timeRange2.second);
+  std::cout << "Using timeRange method (timeRange = (0, 0.5)) : " << std::endl;
+  std::cout << "Expected configuration (using end() method): " << std::endl;
+  std::cout << path2->end() << std::endl;
+  std::cout << std::endl << "Calculated configuration (using impl_compute at timeRange.second): " << std::endl;
+  std::cout << q_2 <<std::endl << std::endl;
   BOOST_CHECK(suc2);
   BOOST_CHECK(q_2 == path2->end());
 
   hpp::core::Configuration_t q_3(path3->outputSize());
   bool suc3 = path3->impl_compute(q_3, timeRange3.second);
+  std::cout << "Using timeRange method (timeRange = (0,2)): " << std::endl;
+  std::cout << "Expected configuration (using end() method): " << std::endl;
+  std::cout << path3->end() << std::endl;
+  std::cout << std::endl << "Calculated configuration (using impl_compute at timeRange.second): " << std::endl;
+  std::cout << q_3 <<std::endl << std::endl;
   BOOST_CHECK(suc3);
   BOOST_CHECK(q_3 == path3->end());
   
