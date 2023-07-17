@@ -179,10 +179,6 @@ PathPtr_t EET_PIECEWISE::projectedPath(vectorIn_t times,
 
   typedef InterpolatedPath::InterpolationPoints_t IPs_t;
   const IPs_t& ips2 = path->interpolationPoints();
-  cout <<  "ips2 length : " << ips2.size() << endl;
-  for (auto itera = ips2.begin(); itera != ips2.end(); itera++){
-    cout << "ips values : \n" << itera->second << endl;
-  }
 
   return path;
 }
@@ -300,17 +296,10 @@ PathPtr_t EET_HERMITE::projectedPath(vectorIn_t times,
   using core::InterpolatedPath;
   using core::InterpolatedPathPtr_t;
 
-  cout << "\n\n In projected path before adding points" << endl;
-
   InterpolatedPathPtr_t path = InterpolatedPath::create(
       problem()->robot(), configs.col(0), configs.col(N - 1), timeRange_, c);
 
   typedef InterpolatedPath::InterpolationPoints_t IPs_t;
-  const IPs_t& ips2 = path->interpolationPoints();
-  cout <<  "ips2 length : " << ips2.size() << endl;
-  for (auto itera = ips2.begin(); itera != ips2.end(); itera++){
-    cout << "ips values : \n" << itera->second << endl;
-  }
 
   for (size_type i = 1; i < configs.cols() - 1; ++i){
     auto it = find(to_keep.begin(),to_keep.end(),i);
@@ -318,15 +307,6 @@ PathPtr_t EET_HERMITE::projectedPath(vectorIn_t times,
       path->insert(times[i], configs.col(i));
     }
   }
-
-  cout << "\n\n In projected path after adding "<< configs.cols()-2 <<" points" << endl;
-  
-  const IPs_t& ips = path->interpolationPoints();
-  cout <<  "ips length : " << ips.size() << endl;
-  for (auto itera = ips.begin(); itera != ips.end(); itera++){
-    cout << "ips values : \n" << itera->second << endl;
-  }
-  cout << "\n out of projected path \n" << endl;
   return path;
 }
 
