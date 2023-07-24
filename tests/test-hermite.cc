@@ -47,8 +47,8 @@ void initialize(bool ur5) {
 
   q1 = Configuration_t::Zero(6);
   q2 = Configuration_t::Zero(6);
-  q1 << 0.0, 1.0, 0.0, 2.0, 0.0, 0;
-  q2 << 1,2,3,4,5,6;
+  q1 << 3.8269, 4.24805, -2.18334, -0.494908, 1.56957, -0.885487;
+  q2 << 3.8539, 4.28178, -2.19695,-0.515076,  1.56959,-0.858488;
 
 }
 }  // namespace hpp_test
@@ -87,26 +87,48 @@ BOOST_AUTO_TEST_CASE(Initialization) {
   cout << q_NO_TR <<endl <<  path_no_TR->end() << endl;
   BOOST_CHECK(suc_NO_TR);
   BOOST_CHECK(q_NO_TR == path_no_TR->end());
+  cout << endl;
 
   hpp::core::Configuration_t q_1_ (path1->outputSize());
   bool suc1_ = path1->impl_compute(q_1_, timeRange1.second);
   cout << q_1_ << endl << path1 ->end() << endl;
   BOOST_CHECK(suc1_);
   BOOST_CHECK(q_1_ == path1->end());
-
+  cout << endl;
   hpp::core::Configuration_t q_1 (path1->outputSize());
   bool suc1 = path1->impl_compute(q_1, timeRange1.second);
   BOOST_CHECK(suc1);
   BOOST_CHECK(q_1 == path1->end());
-  
+  cout << endl;
   hpp::core::Configuration_t q_2(path2->outputSize());
   bool suc2 = path2->impl_compute(q_2, timeRange2.second);
   BOOST_CHECK(suc2);
   BOOST_CHECK(q_2 == path2->end());
-
+  cout << endl;
   hpp::core::Configuration_t q_3(path3->outputSize());
   bool suc3 = path3->impl_compute(q_3, timeRange3.second);
   BOOST_CHECK(suc3);
   BOOST_CHECK(q_3 == path3->end());
+  cout << endl;
+  hpp::core::Configuration_t q_init(path1->outputSize());
+  bool suc4 = path1->impl_compute(q_init, timeRange1.first);
+  cout << q_init << endl << path1->initial() << endl;
+  BOOST_CHECK(suc4);
+  BOOST_CHECK(q_init == path1->initial());  
+  cout << endl;
+  cout << endl;
+  cout << endl;
+  cout << endl;
+  cout << endl;
   
+  cout << path1->v0() << endl;
+  cout << path1->v1() << endl;
+
+  cout << path2->v0() << endl;
+  cout << path2->v1() << endl;
+
+  cout << path3->v0() << endl;
+  cout << path3->v1() << endl;
+
+
 }

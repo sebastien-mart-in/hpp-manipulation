@@ -222,7 +222,6 @@ void EET_PIECEWISE::oneStep() {
         break;
       }
     }
-    cout << "steps : " << steps << endl;
     if (!success) continue;
     success = false;
 
@@ -352,7 +351,6 @@ PathVectorPtr_t EET_HERMITE::solve() {
   }
   PathVectorPtr_t planned = final_answer;
   cout<< "returned a final answer in solve" << endl;
-  
   return planned;
 }
 
@@ -538,7 +536,6 @@ void EET_HERMITE::oneStep(){
     if (!recursor->impl_apply(path, answer)) continue;
 
     PathVectorPtr_t inter_ =HPP_DYNAMIC_PTR_CAST(core::PathVector,answer);
-
     final_answer = inter_;
 
     problem_solved = true;
