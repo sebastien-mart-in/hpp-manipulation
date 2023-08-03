@@ -19,6 +19,7 @@
 #include "hpp/constraints/differentiable-function.hh"
 #include "hpp/core/path/hermite.hh"
 
+
 using hpp::core::SteeringMethodPtr_t;
 using hpp::core::steeringMethod::Straight;
 
@@ -47,8 +48,8 @@ void initialize(bool ur5) {
 
   q1 = Configuration_t::Zero(6);
   q2 = Configuration_t::Zero(6);
-  q1 << 3.8269, 4.24805, -2.18334, -0.494908, 1.56957, -0.885487;
-  q2 << 3.8539, 4.28178, -2.19695,-0.515076,  1.56959,-0.858488;
+  q1 << 0,3,0,-3,0,0;
+  q2 << 1,1,2,1,1,1;
 
 }
 }  // namespace hpp_test
@@ -71,64 +72,16 @@ BOOST_AUTO_TEST_CASE(Initialization) {
   initialize(true);
   hpp::core::ConstraintSetPtr_t constraint = hpp::core::ConstraintSet::create(robot, "contrainte vide");
   hpp::core::interval_t timeRange1(0,1);
-  hpp::core::interval_t timeRange2(0,0.5);
-  hpp::core::interval_t timeRange3(0,2);
 
   hpp::core::path::HermitePtr_t path1 = hpp::core::path::Hermite::create_with_timeRange(robot, q1, q2, constraint, timeRange1);
-  hpp::core::path::HermitePtr_t path2 = hpp::core::path::Hermite::create_with_timeRange(robot, q1, q2, constraint, timeRange2);
-  hpp::core::path::HermitePtr_t path3 = hpp::core::path::Hermite::create_with_timeRange(robot, q1, q2, constraint, timeRange3);
-  hpp::core::path::HermitePtr_t path_no_TR = hpp::core::path::Hermite::create(robot, q1, q2, constraint);
-
-
   
-
-  hpp::core::Configuration_t q_NO_TR (path_no_TR->outputSize());
-  bool suc_NO_TR = path_no_TR->impl_compute(q_NO_TR, 1);
-  cout << q_NO_TR <<endl <<  path_no_TR->end() << endl;
-  BOOST_CHECK(suc_NO_TR);
-  BOOST_CHECK(q_NO_TR == path_no_TR->end());
-  cout << endl;
-
-  hpp::core::Configuration_t q_1_ (path1->outputSize());
-  bool suc1_ = path1->impl_compute(q_1_, timeRange1.second);
-  cout << q_1_ << endl << path1 ->end() << endl;
-  BOOST_CHECK(suc1_);
-  BOOST_CHECK(q_1_ == path1->end());
-  cout << endl;
-  hpp::core::Configuration_t q_1 (path1->outputSize());
-  bool suc1 = path1->impl_compute(q_1, timeRange1.second);
-  BOOST_CHECK(suc1);
-  BOOST_CHECK(q_1 == path1->end());
-  cout << endl;
-  hpp::core::Configuration_t q_2(path2->outputSize());
-  bool suc2 = path2->impl_compute(q_2, timeRange2.second);
-  BOOST_CHECK(suc2);
-  BOOST_CHECK(q_2 == path2->end());
-  cout << endl;
-  hpp::core::Configuration_t q_3(path3->outputSize());
-  bool suc3 = path3->impl_compute(q_3, timeRange3.second);
-  BOOST_CHECK(suc3);
-  BOOST_CHECK(q_3 == path3->end());
-  cout << endl;
-  hpp::core::Configuration_t q_init(path1->outputSize());
-  bool suc4 = path1->impl_compute(q_init, timeRange1.first);
-  cout << q_init << endl << path1->initial() << endl;
-  BOOST_CHECK(suc4);
-  BOOST_CHECK(q_init == path1->initial());  
-  cout << endl;
-  cout << endl;
-  cout << endl;
-  cout << endl;
-  cout << endl;
+  hpp::core::vector_t rrr(path1->outputDerivativeSize());
+  path1->derivative(rrr,path1->timeRange().second, 1); 
+  cout << endl << "rrr :\n" << rrr << endl;
+  BOOST_CHECK(rrr == path1->v1());
   
-  cout << path1->v0() << endl;
-  cout << path1->v1() << endl;
-
-  cout << path2->v0() << endl;
-  cout << path2->v1() << endl;
-
-  cout << path3->v0() << endl;
-  cout << path3->v1() << endl;
 
 
 }
+
+

@@ -85,7 +85,7 @@ class FunctionFromPath : public constraints::DifferentiableFunction {
 };
 }  // namespace
 
-PathPtr_t EET_PIECEWISE::makePiecewiseLinearTrajectory(
+PathPtr_t EndEffectorTrajectory::makePiecewiseLinearTrajectory(
     matrixIn_t points, vectorIn_t weights) {
   if (points.cols() != 7)
     throw std::invalid_argument("The input matrix should have 7 columns");
@@ -108,13 +108,13 @@ PathPtr_t EET_PIECEWISE::makePiecewiseLinearTrajectory(
   return path;
 }
 
-void EET_PIECEWISE::trajectoryConstraint(
+void EndEffectorTrajectory::trajectoryConstraint(
     const constraints::ImplicitPtr_t& ic) {
   constraint_ = ic;
   if (eeTraj_) trajectory(eeTraj_, timeRange_);
 }
 
-void EET_PIECEWISE::trajectory(const PathPtr_t& eeTraj,
+void EndEffectorTrajectory::trajectory(const PathPtr_t& eeTraj,
                                        bool se3Output) {
   if (se3Output)
     trajectory(DifferentiableFunctionPtr_t(new FunctionFromPath<true>(eeTraj)),
@@ -124,7 +124,7 @@ void EET_PIECEWISE::trajectory(const PathPtr_t& eeTraj,
                eeTraj->timeRange());
 }
 
-void EET_PIECEWISE::trajectory(
+void EndEffectorTrajectory::trajectory(
     const DifferentiableFunctionPtr_t& eeTraj, const interval_t& tr) {
   assert(eeTraj->inputSize() == 1);
   assert(eeTraj->inputDerivativeSize() == 1);
@@ -136,7 +136,7 @@ void EET_PIECEWISE::trajectory(
   constraint_->rightHandSideFunction(eeTraj_);
 }
 
-PathPtr_t EET_PIECEWISE::impl_compute(ConfigurationIn_t q1,
+PathPtr_t EndEffectorTrajectory::impl_compute(ConfigurationIn_t q1,
                                               ConfigurationIn_t q2) const {
   try {
     core::ConstraintSetPtr_t c(getUpdatedConstraints());
@@ -155,7 +155,7 @@ PathPtr_t EET_PIECEWISE::impl_compute(ConfigurationIn_t q1,
   }
 }
 
-PathPtr_t EET_PIECEWISE::projectedPath(vectorIn_t times,
+PathPtr_t EndEffectorTrajectory::projectedPath(vectorIn_t times,
                                                matrixIn_t configs) const {
   core::ConstraintSetPtr_t c(getUpdatedConstraints());
 
@@ -183,15 +183,15 @@ PathPtr_t EET_PIECEWISE::projectedPath(vectorIn_t times,
   return path;
 }
 
-core::ConstraintSetPtr_t EET_PIECEWISE::getUpdatedConstraints() const {
+core::ConstraintSetPtr_t EndEffectorTrajectory::getUpdatedConstraints() const {
   if (!eeTraj_)
-    throw std::logic_error("EET_PIECEWISE not initialized.");
+    throw std::logic_error("EndEffectorTrajectory not initialized.");
 
   // Update (or check) the constraints
   core::ConstraintSetPtr_t c(constraints());
   if (!c || !c->configProjector()) {
     throw std::logic_error(
-        "EET_PIECEWISE steering method must "
+        "EndEffectorTrajectory steering method must "
         "have a ConfigProjector");
   }
   ConfigProjectorPtr_t cp(c->configProjector());
@@ -217,7 +217,7 @@ core::ConstraintSetPtr_t EET_PIECEWISE::getUpdatedConstraints() const {
   }
   if (!ok) {
     HPP_THROW(std::logic_error,
-              "EET_PIECEWISE could not find "
+              "EndEffectorTrajectory could not find "
               "constraint "
                   << constraint_->function());
   }
@@ -300,6 +300,10 @@ PathPtr_t EET_HERMITE::projectedPath(vectorIn_t times,
       problem()->robot(), configs.col(0), configs.col(N - 1), timeRange_, c);
 
   typedef InterpolatedPath::InterpolationPoints_t IPs_t;
+
+  if(path->end() == configs.col(to_keep.back())){
+    to_keep.pop_back();
+  }
 
   for (size_type i = 1; i < configs.cols() - 1; ++i){
     auto it = find(to_keep.begin(),to_keep.end(),i);

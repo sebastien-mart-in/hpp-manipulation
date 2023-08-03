@@ -122,7 +122,7 @@ ProblemSolver::ProblemSolver() : core::ProblemSolver(), robot_(), problem_() {
 
   pathPlanners.add("M-RRT", ManipulationPlanner::create);
   pathPlanners.add("Piecewise",
-                   pathPlanner::EET_PIECEWISE::createWithRoadmap);
+                   pathPlanner::EndEffectorTrajectory::createWithRoadmap);
   pathPlanners.add("Hermite",
                    pathPlanner::EET_HERMITE::create);
 
@@ -196,7 +196,7 @@ ProblemSolver::ProblemSolver() : core::ProblemSolver(), robot_(), problem_() {
                       createSMWithGuess<steeringMethod::CrossStateOptimization,
                                         core::steeringMethod::Snibud>);
   steeringMethods.add("Piecewise",
-                      steeringMethod::EET_PIECEWISE::create);
+                      steeringMethod::EndEffectorTrajectory::create);
   steeringMethods.add("Hermite",
                       steeringMethod::EET_HERMITE::create);
 

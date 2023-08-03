@@ -68,28 +68,28 @@ using namespace std;
 namespace hpp {
 namespace manipulation {
 namespace pathPlanner {
-typedef manipulation::steeringMethod::EET_PIECEWISE SM_t;
-typedef manipulation::steeringMethod::EET_PIECEWISEPtr_t SMPtr_t;
+typedef manipulation::steeringMethod::EndEffectorTrajectory SM_t;
+typedef manipulation::steeringMethod::EndEffectorTrajectoryPtr_t SMPtr_t;
 unsigned long int uint_infty =
     std::numeric_limits<unsigned long int>::infinity();
 
-EET_PIECEWISEPtr_t EET_PIECEWISE::create(
+EndEffectorTrajectoryPtr_t EndEffectorTrajectory::create(
     const core::ProblemConstPtr_t& problem) {
-  EET_PIECEWISEPtr_t ptr(new EET_PIECEWISE(problem));
+  EndEffectorTrajectoryPtr_t ptr(new EndEffectorTrajectory(problem));
   ptr->init(ptr);
   return ptr;
 }
 
-EET_PIECEWISEPtr_t EET_PIECEWISE::createWithRoadmap(
+EndEffectorTrajectoryPtr_t EndEffectorTrajectory::createWithRoadmap(
     const core::ProblemConstPtr_t& problem, const core::RoadmapPtr_t& roadmap) {
-  EET_PIECEWISEPtr_t ptr(new EET_PIECEWISE(problem, roadmap));
+  EndEffectorTrajectoryPtr_t ptr(new EndEffectorTrajectory(problem, roadmap));
   ptr->init(ptr);
   return ptr;
 }
 
-void EET_PIECEWISE::tryConnectInitAndGoals() {}
+void EndEffectorTrajectory::tryConnectInitAndGoals() {}
 
-void EET_PIECEWISE::startSolve() {
+void EndEffectorTrajectory::startSolve() {
   // core::PathPlanner::startSolve();
   // problem().checkProblem ();
   if (!problem()->robot()) {
@@ -111,7 +111,7 @@ void EET_PIECEWISE::startSolve() {
   if (!sm)
     throw std::invalid_argument(
         "Steering method must be of type "
-        "hpp::manipulation::steeringMethod::EET_PIECEWISE");
+        "hpp::manipulation::steeringMethod::EndEffectorTrajectory");
 
   if (!sm->constraints() || !sm->constraints()->configProjector())
     throw std::invalid_argument(
@@ -121,9 +121,9 @@ void EET_PIECEWISE::startSolve() {
   const constraints::ImplicitPtr_t& trajConstraint = sm->trajectoryConstraint();
   if (!trajConstraint)
     throw std::invalid_argument(
-        "EET_PIECEWISE has no trajectory constraint.");
+        "EndEffectorTrajectory has no trajectory constraint.");
   if (!sm->trajectory())
-    throw std::invalid_argument("EET_PIECEWISE has no trajectory.");
+    throw std::invalid_argument("EndEffectorTrajectory has no trajectory.");
 
   const core::NumericalConstraints_t& ncs = constraints->numericalConstraints();
   bool ok = false;
@@ -146,23 +146,23 @@ void EET_PIECEWISE::startSolve() {
   }
   if (!ok) {
     HPP_THROW(std::logic_error,
-              "EET_PIECEWISE could not find "
+              "EndEffectorTrajectory could not find "
               "constraint "
                   << trajConstraint->function());
   }
 }
 
-void EET_PIECEWISE::oneStep() {
+void EndEffectorTrajectory::oneStep() {
   SMPtr_t sm(HPP_DYNAMIC_PTR_CAST(SM_t, problem()->steeringMethod()));
   if (!sm)
     throw std::invalid_argument(
         "Steering method must be of type "
-        "hpp::manipulation::steeringMethod::EET_PIECEWISE");
+        "hpp::manipulation::steeringMethod::EndEffectorTrajectory");
   if (!sm->trajectoryConstraint())
     throw std::invalid_argument(
-        "EET_PIECEWISE has no trajectory constraint.");
+        "EndEffectorTrajectory has no trajectory constraint.");
   if (!sm->trajectory())
-    throw std::invalid_argument("EET_PIECEWISE has no trajectory.");
+    throw std::invalid_argument("EndEffectorTrajectory has no trajectory.");
 
   if (!sm->constraints() || !sm->constraints()->configProjector())
     throw std::invalid_argument(
@@ -255,7 +255,7 @@ void EET_PIECEWISE::oneStep() {
   }
 }
 
-std::vector<core::Configuration_t> EET_PIECEWISE::configurations(
+std::vector<core::Configuration_t> EndEffectorTrajectory::configurations(
     const core::Configuration_t& q_init) {
   if (!ikSolverInit_) {
     std::vector<core::Configuration_t> configs(nRandomConfig_ + 1);
@@ -272,19 +272,19 @@ std::vector<core::Configuration_t> EET_PIECEWISE::configurations(
       "Using an IkSolverInitialization is not implemented yet");
 }
 
-EET_PIECEWISE::EET_PIECEWISE(
+EndEffectorTrajectory::EndEffectorTrajectory(
     const core::ProblemConstPtr_t& problem)
     : core::PathPlanner(problem) {}
 
-EET_PIECEWISE::EET_PIECEWISE(
+EndEffectorTrajectory::EndEffectorTrajectory(
     const core::ProblemConstPtr_t& problem, const core::RoadmapPtr_t& roadmap)
     : core::PathPlanner(problem, roadmap) {}
 
-void EET_PIECEWISE::checkFeasibilityOnly(bool enable) {
+void EndEffectorTrajectory::checkFeasibilityOnly(bool enable) {
   feasibilityOnly_ = enable;
 }
 
-void EET_PIECEWISE::init(const EET_PIECEWISEWkPtr_t& weak) {
+void EndEffectorTrajectory::init(const EndEffectorTrajectoryWkPtr_t& weak) {
   core::PathPlanner::init(weak);
   weak_ = weak;
   nRandomConfig_ = 10;
@@ -447,8 +447,8 @@ void EET_HERMITE::oneStep(){
     hppDout(info, "Failed to generate initial configs.");
     return;
   }
-  
 
+  
   // Generate a valid initial configuration.
   bool success = false;
   bool resetRightHandSide = true;
@@ -492,6 +492,7 @@ void EET_HERMITE::oneStep(){
       }
       if (steps.col(j) != steps.col(j - 1)){
         to_keep.push_back(j);
+        cout << "j : \n" << j << endl << to_keep.size() << endl;
       }
     
 
@@ -519,8 +520,10 @@ void EET_HERMITE::oneStep(){
     
     vector_t retained_times(to_keep.size());
     int adder = 0;
+    cout << "retained " << endl;
     for (int x : to_keep){
       retained_times[adder]=times[x];
+      cout << times[x] <<endl;
       adder++;
     }
 
@@ -535,9 +538,30 @@ void EET_HERMITE::oneStep(){
     
     if (!recursor->impl_apply(path, answer)) continue;
 
-    PathVectorPtr_t inter_ =HPP_DYNAMIC_PTR_CAST(core::PathVector,answer);
-    final_answer = inter_;
+    Configuration_t q1, q2;
+    q1 = steps.col(to_keep.front());
+    to_keep.pop_front();
+    q2 = steps.col(to_keep.front());
+    cout << "q1 : \n" << q1 << endl;
+    cout << "q2 : \n" << q2 << endl;    
 
+    hpp::core::interval_t timeRange1(retained_times[0],retained_times[1]);
+    cout << "temps : \n " << timeRange1.second - timeRange1.first << endl;
+
+    hpp::core::path::HermitePtr_t path1 = hpp::core::path::Hermite::create_with_timeRange(problem()->robot(), q1, q2, sm->constraints(), timeRange1);
+    
+    hpp::core::vector_t rrr(path1->outputDerivativeSize());
+    path1->derivative(rrr,path1->timeRange().first, 1); 
+    cout << endl << "der 0 :\n" << rrr << endl << "v0 :\n" << path1->v0() << endl;
+    path1->derivative(rrr,path1->timeRange().second, 1); 
+    cout << endl << "der 1 :\n" << rrr << endl << "v1 :\n" << path1->v1() << endl;  
+    path1->derivative(rrr,(path1->timeRange().second + path1->timeRange().first) /2, 1); 
+    cout << endl << "der demi :\n" << rrr << endl; 
+
+
+    PathVectorPtr_t inter_ =HPP_DYNAMIC_PTR_CAST(core::PathVector,answer);    
+    final_answer = inter_;
+    
     problem_solved = true;
     success = true;
     if (feasibilityOnly_) break;

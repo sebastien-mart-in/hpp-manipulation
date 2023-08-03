@@ -45,20 +45,20 @@ namespace manipulation {
 /// \addtogroup steering_method
 /// \{
 namespace steeringMethod {
-HPP_PREDEF_CLASS(EET_PIECEWISE);
-typedef shared_ptr<EET_PIECEWISE> EET_PIECEWISEPtr_t;
+HPP_PREDEF_CLASS(EndEffectorTrajectory);
+typedef shared_ptr<EndEffectorTrajectory> EndEffectorTrajectoryPtr_t;
 
 using core::PathPtr_t;
 
 /// Build StraightPath constrained by a varying right hand side constraint.
-class HPP_MANIPULATION_DLLAPI EET_PIECEWISE
+class HPP_MANIPULATION_DLLAPI EndEffectorTrajectory
     : public core::SteeringMethod {
  public:
   typedef core::interval_t interval_t;
 
-  static EET_PIECEWISEPtr_t create(
+  static EndEffectorTrajectoryPtr_t create(
       const core::ProblemConstPtr_t& problem) {
-    EET_PIECEWISEPtr_t ptr(new EET_PIECEWISE(problem));
+    EndEffectorTrajectoryPtr_t ptr(new EndEffectorTrajectory(problem));
     ptr->init(ptr);
     return ptr;
   }
@@ -93,7 +93,7 @@ class HPP_MANIPULATION_DLLAPI EET_PIECEWISE
   const interval_t& timeRange() const { return timeRange_; }
 
   core::SteeringMethodPtr_t copy() const {
-    EET_PIECEWISEPtr_t ptr(new EET_PIECEWISE(*this));
+    EndEffectorTrajectoryPtr_t ptr(new EndEffectorTrajectory(*this));
     ptr->init(ptr);
     return ptr;
   }
@@ -106,10 +106,10 @@ class HPP_MANIPULATION_DLLAPI EET_PIECEWISE
   core::ConstraintSetPtr_t getUpdatedConstraints() const;
 
  protected:
-  EET_PIECEWISE(const core::ProblemConstPtr_t& problem)
+  EndEffectorTrajectory(const core::ProblemConstPtr_t& problem)
       : core::SteeringMethod(problem) {}
 
-  EET_PIECEWISE(const EET_PIECEWISE& other)
+  EndEffectorTrajectory(const EndEffectorTrajectory& other)
       : core::SteeringMethod(other),
         eeTraj_(other.eeTraj_),
         timeRange_(other.timeRange_),

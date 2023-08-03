@@ -50,20 +50,20 @@ class HPP_MANIPULATION_DLLAPI IkSolverInitialization {
 };
 typedef shared_ptr<IkSolverInitialization> IkSolverInitializationPtr_t;
 
-HPP_PREDEF_CLASS(EET_PIECEWISE);
-typedef shared_ptr<EET_PIECEWISE> EET_PIECEWISEPtr_t;
+HPP_PREDEF_CLASS(EndEffectorTrajectory);
+typedef shared_ptr<EndEffectorTrajectory> EndEffectorTrajectoryPtr_t;
 typedef hpp::core::PathVectorPtr_t PathVectorPtr_t;
 
-class HPP_MANIPULATION_DLLAPI EET_PIECEWISE : public core::PathPlanner {
+class HPP_MANIPULATION_DLLAPI EndEffectorTrajectory : public core::PathPlanner {
  public:
   /// Return shared pointer to new instance
   /// \param problem the path planning problem
-  static EET_PIECEWISEPtr_t create(
+  static EndEffectorTrajectoryPtr_t create(
       const core::ProblemConstPtr_t& problem);
   /// Return shared pointer to new instance
   /// \param problem the path planning problem
   /// \param roadmap previously built roadmap
-  static EET_PIECEWISEPtr_t createWithRoadmap(
+  static EndEffectorTrajectoryPtr_t createWithRoadmap(
       const core::ProblemConstPtr_t& problem,
       const core::RoadmapPtr_t& roadmap);
 
@@ -107,21 +107,21 @@ class HPP_MANIPULATION_DLLAPI EET_PIECEWISE : public core::PathPlanner {
  protected:
   /// Protected constructor
   /// \param problem the path planning problem
-  EET_PIECEWISE(const core::ProblemConstPtr_t& problem);
+  EndEffectorTrajectory(const core::ProblemConstPtr_t& problem);
   /// Protected constructor
   /// \param problem the path planning problem
   /// \param roadmap previously built roadmap
-  EET_PIECEWISE(const core::ProblemConstPtr_t& problem,
+  EndEffectorTrajectory(const core::ProblemConstPtr_t& problem,
                         const core::RoadmapPtr_t& roadmap);
   /// Store weak pointer to itself
-  void init(const EET_PIECEWISEWkPtr_t& weak);
+  void init(const EndEffectorTrajectoryWkPtr_t& weak);
 
  private:
   std::vector<core::Configuration_t> configurations(
       const core::Configuration_t& q_init);
 
   /// Weak pointer to itself
-  EET_PIECEWISEWkPtr_t weak_;
+  EndEffectorTrajectoryWkPtr_t weak_;
   /// Number of random config.
   int nRandomConfig_;
   /// Number of steps to generate goal config.
@@ -130,7 +130,7 @@ class HPP_MANIPULATION_DLLAPI EET_PIECEWISE : public core::PathPlanner {
   IkSolverInitializationPtr_t ikSolverInit_;
   /// Feasibility
   bool feasibilityOnly_;
-};  // class EET_PIECEWISE
+};  // class EndEffectorTrajectory
 
 
 HPP_PREDEF_CLASS(EET_HERMITE);
