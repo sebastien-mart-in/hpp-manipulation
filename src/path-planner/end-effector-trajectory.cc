@@ -293,9 +293,10 @@ void EndEffectorTrajectory::init(const EndEffectorTrajectoryWkPtr_t& weak) {
 typedef manipulation::steeringMethod::EET_HERMITE HSM_t;
 typedef manipulation::steeringMethod::EET_HERMITEPtr_t HSMPtr_t;
 
-
+// The argument roadmap has to be removed in the future 
 EET_HERMITEPtr_t EET_HERMITE::create(
 const core::ProblemConstPtr_t& problem, const core::RoadmapPtr_t& roadmap) {
+// The base value of M is set to 2
 value_type M(2);
 EET_HERMITEPtr_t ptr(new EET_HERMITE(problem, M));
 ptr->init(ptr);
@@ -526,7 +527,7 @@ void EET_HERMITE::oneStep(){
       continue;
     }
     success = false;
-    core::pathProjector::RecursiveHermitePtr_t recursor (core::pathProjector::RecursiveHermite::create(problem(), M, retained_times));
+    core::pathProjector::RecursiveHermitePtr_t recursor (core::pathProjector::RecursiveHermite::create(problem(), get_M_value(), retained_times));
     core::PathPtr_t answer (hpp::core::PathVector::create(problem()->robot()->configSize(), path->outputDerivativeSize()));
     
     if (!recursor->impl_apply(path, answer)) continue;

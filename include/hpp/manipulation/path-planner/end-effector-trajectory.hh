@@ -138,6 +138,8 @@ typedef shared_ptr<EET_HERMITE> EET_HERMITEPtr_t;
 
 class HPP_MANIPULATION_DLLAPI EET_HERMITE : public core::PathPlanner {
  public:
+
+  // The argument roadmap has to be removed in the future
   /// Return shared pointer to new instance
   /// \param problem the path planning problem
   static EET_HERMITEPtr_t create(
@@ -168,6 +170,14 @@ class HPP_MANIPULATION_DLLAPI EET_HERMITE : public core::PathPlanner {
   void nDiscreteSteps(int n) {
     assert(n > 0);
     nDiscreteSteps_ = n;
+  }
+
+  /// The value of M for the recursion 
+  value_type get_M_value() const { return M; }
+
+  void set_M_value(value_type m) {
+    assert(m > 0);
+    M = m;
   }
 
   /// If enabled, only add one solution to the roadmap.
