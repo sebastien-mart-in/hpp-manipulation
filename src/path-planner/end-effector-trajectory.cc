@@ -449,7 +449,7 @@ void EET_HERMITE::oneStep(){
   times[nDiscreteSteps_] = timeRange.second;
 
   for (i = 0; i < qs.size(); ++i) {
-
+    // We keep in to_keep the indexes of the position that changed after being projected
     list<int> to_keep;
     if (resetRightHandSide) {
       constraints->rightHandSideAt(times[0]);
@@ -475,6 +475,8 @@ void EET_HERMITE::oneStep(){
         success = false;
         break;
       }
+      // It's possible that the projection doesn't change the configuration because
+      // it is already in the tolerance threshold
       if (steps.col(j) != steps.col(j - 1)){
         to_keep.push_back(j);
       }
@@ -502,6 +504,7 @@ void EET_HERMITE::oneStep(){
       continue;
     }
     
+    // We keep only the times where the configuration changed when projected
     vector_t retained_times(to_keep.size());
     int adder = 0;
     for (int x : to_keep){
@@ -519,6 +522,7 @@ void EET_HERMITE::oneStep(){
     core::PathPtr_t answer (hpp::core::PathVector::create(problem()->robot()->configSize(), path->outputDerivativeSize()));
     
     if (!recursor->impl_apply(path, answer)) continue;
+    // We need to convert to PathVector to be able to retrun the result
     PathVectorPtr_t inter_ =HPP_DYNAMIC_PTR_CAST(core::PathVector,answer);    
     final_answer = inter_;
     
