@@ -26,8 +26,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 // DAMAGE.
 
-#include <iostream>
-#include <typeinfo>
 using namespace std;
 #include <hpp/constraints/differentiable-function.hh>
 #include <hpp/constraints/implicit.hh>
@@ -238,7 +236,7 @@ void EndEffectorTrajectory::oneStep() {
                         << condensed(steps.transpose()) << '\n');
       continue;
     }
-    
+
     core::PathPtr_t validPart;
     if (!pathValidation->validate(path, false, validPart, pathReport)) {
       hppDout(info, "Path is in collision.");
@@ -350,7 +348,6 @@ PathVectorPtr_t EET_HERMITE::solve() {
     if (interrupt_) throw ("Interruption");
   }
   PathVectorPtr_t planned = final_answer;
-  cout<< "returned a final answer in solve" << endl;
   return planned;
 }
 
@@ -417,7 +414,6 @@ HPP_THROW(std::logic_error,
 }
 
 void EET_HERMITE::oneStep(){
-  cout << "beginning of oneStep" << endl;
   HSMPtr_t sm(HPP_DYNAMIC_PTR_CAST(HSM_t, problem()->steeringMethod()));
   if (!sm)
     throw std::invalid_argument(
@@ -492,7 +488,6 @@ void EET_HERMITE::oneStep(){
       }
       if (steps.col(j) != steps.col(j - 1)){
         to_keep.push_back(j);
-        cout << "j : \n" << j << endl << to_keep.size() << endl;
       }
     
 
@@ -520,10 +515,8 @@ void EET_HERMITE::oneStep(){
     
     vector_t retained_times(to_keep.size());
     int adder = 0;
-    cout << "retained " << endl;
     for (int x : to_keep){
       retained_times[adder]=times[x];
-      cout << times[x] <<endl;
       adder++;
     }
 
@@ -537,28 +530,6 @@ void EET_HERMITE::oneStep(){
     core::PathPtr_t answer (hpp::core::PathVector::create(problem()->robot()->configSize(), path->outputDerivativeSize()));
     
     if (!recursor->impl_apply(path, answer)) continue;
-
-    Configuration_t q1, q2;
-    q1 = steps.col(to_keep.front());
-    to_keep.pop_front();
-    q2 = steps.col(to_keep.front());
-    cout << "q1 : \n" << q1 << endl;
-    cout << "q2 : \n" << q2 << endl;    
-
-    hpp::core::interval_t timeRange1(retained_times[0],retained_times[1]);
-    cout << "temps : \n " << timeRange1.second - timeRange1.first << endl;
-
-    hpp::core::path::HermitePtr_t path1 = hpp::core::path::Hermite::create_with_timeRange(problem()->robot(), q1, q2, sm->constraints(), timeRange1);
-    
-    hpp::core::vector_t rrr(path1->outputDerivativeSize());
-    path1->derivative(rrr,path1->timeRange().first, 1); 
-    cout << endl << "der 0 :\n" << rrr << endl << "v0 :\n" << path1->v0() << endl;
-    path1->derivative(rrr,path1->timeRange().second, 1); 
-    cout << endl << "der 1 :\n" << rrr << endl << "v1 :\n" << path1->v1() << endl;  
-    path1->derivative(rrr,(path1->timeRange().second + path1->timeRange().first) /2, 1); 
-    cout << endl << "der demi :\n" << rrr << endl; 
-
-
     PathVectorPtr_t inter_ =HPP_DYNAMIC_PTR_CAST(core::PathVector,answer);    
     final_answer = inter_;
     

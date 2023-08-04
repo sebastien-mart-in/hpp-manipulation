@@ -29,10 +29,6 @@
 #ifndef HPP_MANIPULATION_STEERING_METHOD_END_EFFECTOR_TRAJECTORY_HH
 #define HPP_MANIPULATION_STEERING_METHOD_END_EFFECTOR_TRAJECTORY_HH
 
-
-
-#include <iostream>
-#include <typeinfo>
 using namespace std;
 #include <hpp/core/steering-method.hh>
 #include <hpp/manipulation/config.hh>
