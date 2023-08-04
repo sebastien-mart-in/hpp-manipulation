@@ -425,7 +425,7 @@ void EET_HERMITE::oneStep(){
   core::PathValidationReportPtr_t pathReport;
 
   core::interval_t timeRange(sm->timeRange());
-
+  ikSolverInitialization(NULL);
   std::vector<core::Configuration_t> qs(
       configurations(*problem()->initConfig()));
   if (qs.empty()) {
